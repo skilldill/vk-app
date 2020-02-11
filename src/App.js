@@ -7,6 +7,7 @@ import '@vkontakte/vkui/dist/vkui.css';
 import Home from './panels/Home';
 import Persik from './panels/Persik';
 
+
 const App = () => {
 	const [activePanel, setActivePanel] = useState('home');
 	const [fetchedUser, setUser] = useState(null);
@@ -24,6 +25,20 @@ const App = () => {
 			const user = await connect.send('VKWebAppGetUserInfo');
 			setUser(user);
 			setPopout(null);
+
+
+			// Получаем токен для хождение к vk api
+			const {access_token} = await vkConnect.send('VKWebAppGetAuthToken', {
+                app_id: Number(process.env.REACT_APP_APP_ID),
+                scope: 'friends',
+            });
+			// Запрос к vk api для получение друзей пользователя
+			const {response} = await vkConnect.send('VKWebAppCallAPIMethod', {
+                method: 'friends.getAppUsers',
+                params: {access_token, v: process.env.REACT_APP_API_VESRION},
+            });
+
+			console.log("FRIENDS", response);
 		}
 		fetchData();
 	}, []);
